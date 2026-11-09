@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ôn Tập Trắc Nghiệm Dược Học & Bào Chế</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: { 50: '#f0fdf4', 100: '#dcfce7', 500: '#22c55e', 600: '#16a34a', 700: '#15803d' }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 min-h-screen transition-colors duration-200">
+    <!-- Header -->
+    <header class="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 sticky top-0 z-50 shadow-sm">
+        <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+            <div class="flex items-center space-x-3 cursor-pointer" onclick="resetToHome()">
+                <i class="fa-solid fa-pills text-2xl text-emerald-600"></i>
+                <h1 class="text-xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">Quiz Dược Học & Bào Chế</h1>
+            </div>
+            <div class="flex items-center space-x-3">
+                <span id="quiz-mode-badge" class="bg-emerald-100 text-emerald-800 text-xs font-semibold px-2.5 py-1 rounded dark:bg-emerald-900 dark:text-emerald-300">Chế độ: Luyện tập</span>
+                <button id="theme-toggle" class="p-2 rounded-lg bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300">
+                    <i class="fa-solid fa-moon dark:hidden"></i>
+                    <i class="fa-solid fa-sun hidden dark:block"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="max-w-6xl mx-auto px-4 py-6">
+        <!-- Dashboard / Mode Selection -->
+        <div id="mode-selection" class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            <div id="btn-practice-mode" class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border-2 border-emerald-500 transition cursor-pointer" onclick="setMode('PRACTICE')">
+                <div class="flex items-center space-x-4">
+                    <div class="p-4 bg-emerald-100 dark:bg-emerald-900/50 text-emerald-600 dark:text-emerald-400 rounded-xl text-2xl">
+                        <i class="fa-solid fa-book-open"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-bold">Chế Độ Luyện Tập</h3>
+                        <p class="text-sm text-slate-500 dark:text-slate-400">Hiện ngay đáp án Đúng/Sai & giải thích ngay sau khi chọn.</p>
+                    </div>
+                </div>
+            </div>
+            <div id="btn-exam-mode" class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border-2 border-transparent hover:border-teal-500 transition cursor-pointer" onclick="setMode('EXAM')">
+                <div class="flex items-center space-x-4">
+                    <div class="p-4 bg-teal-100 dark:bg-teal-900/50 text-teal-600 dark:text-teal-400 rounded-xl text-2xl">
+                        <i class="fa-solid fa-stopwatch"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-bold">Chế Độ Thi Thử</h3>
+                        <p class="text-sm text-slate-500 dark:text-slate-400">Làm toàn bộ bài thi, bấm Nộp bài mới hiển thị kết quả & điểm số.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Controls & Filters -->
+        <div class="bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 mb-6 flex flex-wrap gap-4 items-center justify-between">
+            <div class="flex flex-wrap gap-3 items-center flex-1">
+                <select id="category-filter" onchange="filterQuestions()" class="bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 text-sm rounded-lg p-2.5 focus:ring-emerald-500 focus:border-emerald-500">
+                    <option value="ALL">Tất cả chủ đề</option>
+                    <option value="PHUN_MU">Thuốc Phun Mù</option>
+                    <option value="THUOC_MO">Thuốc Mỡ & Thuốc Mềm</option>
+                    <option value="THUOC_DAT">Thuốc Đặt & Thuốc Đạn</option>
+                    <option value="THUOC_BOT">Thuốc Bột & Cốm</option>
+                    <option value="VIEN_NEN">Viên Nén & Bao Viên</option>
+                    <option value="TUONG_KY">Tương Kỵ Bào Chế</option>
+                </select>
+                <div class="relative flex-1 min-w-[200px]">
+                    <input type="text" id="search-input" oninput="filterQuestions()" placeholder="Tìm kiếm câu hỏi..." class="w-full bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 text-sm rounded-lg pl-9 pr-3 py-2.5">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-3 text-slate-400 text-sm"></i>
+                </div>
+            </div>
+            <div class="flex items-center space-x-2">
+                <button onclick="shuffleQuestions()" class="px-3 py-2 bg-slate-100 dark:bg-slate-700 text-sm font-medium rounded-lg hover:bg-slate-200 dark:hover:bg-slate-600 transition">
+                    <i class="fa-solid fa-shuffle mr-1"></i> Trộn câu
+                </button>
+                <button id="submit-exam-btn" onclick="submitExam()" class="hidden px-4 py-2 bg-emerald-600 text-white text-sm font-medium rounded-lg hover:bg-emerald-700 transition">
+                    Nộp bài
+                </button>
+            </div>
+        </div>
+
+        <!-- Quiz Container -->
+        <div id="quiz-container" class="space-y-6"></div>
+    </main>
+
+    <script>
+        const rawQuizData = [
+            { id: 1063, cat: "PHUN_MU", q: "Chọn vật liệu dùng làm bình, van đựng thuốc phun mù có dung môi là ethanol và chất đẩy là propellant 21:", a: ["Thép", "Thép không gỉ", "Nhôm", "Thủy tinh", "Chất dẻo dùng cho y tế"], ans: 1 },
+            { id: 1064, cat: "PHUN_MU", q: "Chọn lựa bình, van và nút bấm nắp phun dùng cho thuốc phun mù chứa hoạt chất chữa hen dùng cho đường hô hấp (Isoproterenol HCl 0.25%, Acid ascorbic 0.10%, Ethanol 37.75%, Propellant 12 63.90%):", a: ["Bình thép, van phun liên tục, nút bấm loại để xông hít.", "Bình thép, van định liều, nút bấm dùng cho mũi.", "Bình nhôm, van phun liên tục, nút bấm dùng cho mũi.", "Bình nhôm, van định liều, nút bấm dùng cho mũi.", "Bình thép, van định liều, nút bấm loại để xông hít."], ans: 4 },
+            { id: 1065, cat: "PHUN_MU", q: "Vai trò của sorbitan trioleat trong thành phần thuốc phun mù (Epinephrin bitartrat 0.5%, Sorbitan trioleat 0.5%, Propellant 114 49.5%, Propellant 12 49.5%):", a: ["Hoạt chất hiệp đồng với epinephrin.", "Tăng độ tan epinephrin bitartrat.", "Chống oxy hóa.", "Chất diện hoạt gây thấm.", "Chất bảo quản."], ans: 3 },
+            { id: 1066, cat: "PHUN_MU", q: "Xác định cấu trúc hệ thuốc phun mù (Isoproterenol HCl 0.25%, Acid ascorbic 0.10%, Ethanol 35.75%, Propellant 12 63.90%):", a: ["Dung dịch vì DC tan trong ethanol", "Hỗn dịch", "Nhũ tương D/N", "Hỗn – nhũ tương", "Nhũ tương N/D"], ans: 0 },
+            { id: 1067, cat: "PHUN_MU", q: "Xác định cấu trúc hệ thuốc phun mù (Isoproterenol sulfat 33.3 mg, Oleyl alcol 33.5 mg, Myristyl alcol 33.4 mg, Propellant 12 7 mg, Propellant 114 7 mg):", a: ["Dung dịch", "Hỗn dịch", "Nhũ tương D/N", "Nhũ tương N/D", "Hỗn – nhũ tương"], ans: 1 },
+            { id: 1068, cat: "PHUN_MU", q: "Vai trò của acid oleic trong thuốc phun mù xông hít (Hợp chất steroid 8.4 mg, Acid oleic 0.8 mg, Propellant 11 4.7 mg, Propellant 12 12.2 mg):", a: ["Hiệp đồng với steroid.", "Tăng độ tan steroid.", "Ổn định chống thủy phân.", "Tăng tính thấm.", "Phân tán steroid và làm trơn van."], ans: 4 },
+            { id: 1156, cat: "THUOC_MO", q: "So với đường dùng thuốc qua hệ tiêu hóa, hệ trị liệu qua da có ưu điểm:", a: ["Sử dụng các dược chất có nửa đời (t1/2) dài và ngắn", "Tránh được ảnh hưởng của pH dịch vị", "Duy trì được nồng độ dược chất trong máu cao", "Thích hợp cho nhiều loại bệnh", "Giá thành rẻ hơn các dạng khác"], ans: 1 },
+            { id: 1157, cat: "THUOC_MO", q: "Dược chất dùng trong hệ trị liệu qua da phải đáp ứng được yêu cầu:", a: ["Dễ tan trong nước", "Có nửa đời (t1/2) dài", "Có tác dụng mạnh, liều không quá 2 mg/ngày", "Không thuộc bảng chất độc A, B", "Không gây nghiện"], ans: 2 },
+            { id: 1158, cat: "THUOC_MO", q: "Khi tăng nhiệt độ da (cả nhiệt độ da và nhiệt độ lớp thuốc bôi lên da), sự hấp thu thuốc tăng do:", a: ["Làm tăng độ tan và tốc độ tan của dược chất", "Làm giãn mạch, tăng tuần hoàn", "Làm tăng hệ số khuếch tán D", "Làm tăng hệ số phân bố K", "Làm giảm tính đối kháng của lớp sừng"], ans: 1 },
+            { id: 1159, cat: "THUOC_MO", q: "Khi thêm vào thành phần thuốc hấp thu qua da một số chất làm ẩm tự nhiên (các acid béo, ure và dẫn chất...), sẽ làm tăng hấp thu do:", a: ["Lớp sừng trương phồng, mềm ra", "Tá dược có thế nhiệt động cao hơn", "Tăng hệ số khuếch tán D", "Thay đổi hệ số phân bố K", "Tăng diện tích tiếp xúc"], ans: 0 },
+            { id: 1160, cat: "THUOC_MO", q: "Mức độ và tốc độ giải phóng hoạt chất ra khỏi thuốc mỡ được quyết định bởi:", a: ["Hệ số khuếch tán D", "Hệ số phân bố K", "Gradient nồng độ", "Bản chất của da", "Độ tan dược chất trong tá dược"], ans: 1 },
+            { id: 1281, cat: "THUOC_DAT", q: "Dược chất được hấp thu từ dạng thuốc đặt trực tràng nhiều nhất qua tĩnh mạch:", a: ["Trực tràng trên", "Trực tràng dưới", "Trực tràng giữa", "Tĩnh mạch cửa", "Tĩnh mạch chủ dưới"], ans: 1 },
+            { id: 1282, cat: "THUOC_DAT", q: "Đường đặt trực tràng thích hợp nhất cho các dược chất:", a: ["Không bền trong môi trường acid", "Có độ tan thấp", "Kích ứng đường tiêu hóa", "Có nửa đời (t1/2) ngắn", "Dễ bị oxy hóa"], ans: 2 },
+            { id: 1283, cat: "THUOC_DAT", q: "Butyrol thuộc nhóm tá dược:", a: ["Bơ cacao", "Chất béo bán tổng hợp", "Dầu hydrogen hóa", "Thế phẩm của bơ cacao", "Glycerid bán tổng hợp"], ans: 3 },
+            { id: 1284, cat: "THUOC_DAT", q: "Witepsol thuộc nhóm tá dược:", a: ["Nhũ hóa", "Thân nước", "Thế phẩm của bơ cacao", "Dầu hydrogen hóa", "Glycerid bán tổng hợp"], ans: 4 },
+            { id: 1586, cat: "VIEN_NEN", q: "Sinh khả dụng của viên nén thường không ổn định chủ yếu là do:", a: ["Thường chứa dược chất rắn.", "Dùng nhiều loại tá dược.", "Bị tác động của lực nén.", "Hay dùng qua đường uống.", "Bề mặt tiếp xúc với môi trường hòa tan bị thu nhỏ."], ans: 2 },
+            { id: 1590, cat: "VIEN_NEN", q: "Loại viên nào cần rã nhanh nhất:", a: ["Viên ngậm.", "Viên sủi bọt.", "Viên đặt dưới lưỡi.", "Viên nhai.", "Viên bao tan ở ruột."], ans: 1 },
+            { id: 1595, cat: "VIEN_NEN", q: "Loại viên nào cần bào chế vô khuẩn:", a: ["Viên ngậm.", "Viên sủi bọt.", "Viên đặt dưới lưỡi.", "Viên nhai.", "Viên cấy dưới da."], ans: 4 },
+            { id: 1748, cat: "TUONG_KY", q: "Để hạn chế phản ứng oxy hóa khử gây ra tương kỵ hóa học với các dược chất dễ bị oxy hóa như vitamin C, clopromazin... Người ta thường sục khí trơ vào các giai đoạn:", a: ["Sục vào nước cất trước khi hòa tan dược chất.", "Sục trong khi hòa tan.", "Sục vào dung dịch đã lọc.", "Sục vào phần ống rỗng sau khi đã đóng dung dịch.", "Sục vào nước cất và vào ống rỗng trước và sau khi nạp dung dịch."], ans: 4 },
+            { id: 1750, cat: "TUONG_KY", q: "Vitamin B1 không bền vững trong môi trường kiềm, vì vậy khi pha chế thuốc tiêm, để tránh tương kỵ do phản ứng thủy phân, có thể:", a: ["Trung tính hóa môi trường sau khi hòa tan vitamin B1 bằng natri hydrocarbonat.", "Trung tính hóa môi trường sau khi hòa tan dược chất bằng NaOH.", "Acid hóa môi trường sau khi hòa tan dược chất tới pH 3-4 bằng dung dịch acid hydrocloric loãng 0,1N.", "Acid hóa môi trường trước khi hòa tan DC tới pH 3-4 bằng dung dịch acid hydroclorid 10%", "Acid hóa môi trường sau khi hòa tan DC tới pH 1-2 bằng dung dịch acid hydroclorid 10%"], ans: 2 }
+        ];
+
+        let currentMode = 'PRACTICE';
+        let currentQuestions = [...rawQuizData];
+        let userAnswers = {};
+
+        function setMode(mode) {
+            currentMode = mode;
+            userAnswers = {};
+            document.getElementById('quiz-mode-badge').innerText = mode === 'PRACTICE' ? 'Chế độ: Luyện tập' : 'Chế độ: Thi thử';
+            document.getElementById('submit-exam-btn').classList.toggle('hidden', mode === 'PRACTICE');
+            
+            document.getElementById('btn-practice-mode').className = mode === 'PRACTICE' ? 
+                'bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border-2 border-emerald-500 transition cursor-pointer' : 
+                'bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border-2 border-transparent hover:border-emerald-500 transition cursor-pointer';
+
+            document.getElementById('btn-exam-mode').className = mode === 'EXAM' ? 
+                'bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border-2 border-teal-500 transition cursor-pointer' : 
+                'bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border-2 border-transparent hover:border-teal-500 transition cursor-pointer';
+
+            renderQuestions();
+        }
+
+        function filterQuestions() {
+            const cat = document.getElementById('category-filter').value;
+            const search = document.getElementById('search-input').value.toLowerCase();
+            
+            currentQuestions = rawQuizData.filter(q => {
+                const matchCat = (cat === 'ALL' || q.cat === cat);
+                const matchSearch = q.q.toLowerCase().includes(search);
+                return matchCat && matchSearch;
+            });
+            renderQuestions();
+        }
+
+        function shuffleQuestions() {
+            currentQuestions.sort(() => Math.random() - 0.5);
+            renderQuestions();
+        }
+
+        function renderQuestions() {
+            const container = document.getElementById('quiz-container');
+            container.innerHTML = '';
+
+            if (currentQuestions.length === 0) {
+                container.innerHTML = `<div class="text-center py-10 text-slate-500">Không tìm thấy câu hỏi phù hợp.</div>`;
+                return;
+            }
+
+            currentQuestions.forEach((q, index) => {
+                const card = document.createElement('div');
+                card.className = "bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 transition";
+                
+                const selectedAns = userAnswers[q.id];
+                
+                let optionsHtml = q.a.map((opt, optIndex) => {
+                    let borderStyle = "border-slate-200 dark:border-slate-700";
+                    let bgStyle = "hover:bg-slate-50 dark:hover:bg-slate-700/50";
+                    
+                    if (selectedAns !== undefined) {
+                        if (currentMode === 'PRACTICE') {
+                            if (optIndex === q.ans) {
+                                borderStyle = "border-emerald-500 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 font-semibold";
+                            } else if (optIndex === selectedAns) {
+                                borderStyle = "border-rose-500 bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 font-semibold";
+                            }
+                        } else {
+                            if (optIndex === selectedAns) {
+                                borderStyle = "border-emerald-500 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 font-semibold";
+                            }
+                        }
+                    }
+
+                    return `
+                        <div onclick="selectAnswer(${q.id}, ${optIndex})" class="flex items-start p-3.5 rounded-xl border ${borderStyle} ${bgStyle} cursor-pointer transition select-none">
+                            <input type="radio" name="q_${q.id}" ${selectedAns === optIndex ? 'checked' : ''} class="mt-1 text-emerald-600 focus:ring-emerald-500 pointer-events-none">
+                            <span class="ml-3 text-sm font-medium leading-relaxed">${String.fromCharCode(65 + optIndex)}. ${opt}</span>
+                        </div>
+                    `;
+                }).join('');
+
+                let explainHtml = '';
+                if (currentMode === 'PRACTICE' && selectedAns !== undefined) {
+                    explainHtml = `
+                        <div class="mt-4 p-4 rounded-xl ${selectedAns === q.ans ? 'bg-emerald-50 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300' : 'bg-rose-50 text-rose-800 dark:bg-rose-950/40 dark:text-rose-300'} text-sm font-medium">
+                            <i class="fa-solid ${selectedAns === q.ans ? 'fa-circle-check' : 'fa-circle-xmark'} mr-2"></i>
+                            Đáp án đúng: <strong>${String.fromCharCode(65 + q.ans)}. ${q.a[q.ans]}</strong>
+                        </div>
+                    `;
+                }
+
+                card.innerHTML = `
+                    <div class="flex justify-between items-start mb-3">
+                        <span class="text-xs font-semibold px-2.5 py-1 rounded bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-400">Câu ${index + 1} (Mã ${q.id})</span>
+                    </div>
+                    <h4 class="text-base font-semibold text-slate-900 dark:text-slate-100 mb-4 leading-snug">${q.q}</h4>
+                    <div class="space-y-2.5">${optionsHtml}</div>
+                    ${explainHtml}
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function selectAnswer(qId, optIndex) {
+            userAnswers[qId] = optIndex;
+            renderQuestions();
+        }
+
+        function submitExam() {
+            let correctCount = 0;
+            currentQuestions.forEach(q => {
+                if (userAnswers[q.id] === q.ans) correctCount++;
+            });
+            alert(`Bạn đã hoàn thành bài thi!\nSố câu đúng: ${correctCount}/${currentQuestions.length}\nĐiểm số: ${(correctCount / currentQuestions.length * 10).toFixed(1)}/10`);
+            setMode('PRACTICE');
+        }
+
+        function resetToHome() {
+            currentQuestions = [...rawQuizData];
+            document.getElementById('search-input').value = '';
+            document.getElementById('category-filter').value = 'ALL';
+            setMode('PRACTICE');
+        }
+
+        document.getElementById('theme-toggle').addEventListener('click', () => {
+            document.documentElement.classList.toggle('dark');
+        });
+
+        renderQuestions();
+    </script>
+</body>
+</html>
